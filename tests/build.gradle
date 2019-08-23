@@ -37,6 +37,10 @@ dependencies {
     compile "org.scala-lang:scala-library:${gradle.scala.version}"
     compile "org.apache.openwhisk:openwhisk-tests:${gradle.openwhisk.version}:tests"
     compile "org.apache.openwhisk:openwhisk-tests:${gradle.openwhisk.version}:test-sources"
+    compile "ch.qos.logback:logback-core:1.2.3"
+    compile "ch.qos.logback:logback-classic:1.2.3"
+    compile "net.logstash.logback:logstash-logback-encoder:6.1"
+
 }
 
 tasks.withType(ScalaCompile) {
