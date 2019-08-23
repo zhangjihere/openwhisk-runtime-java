@@ -6,17 +6,21 @@ import java.io.PrintStream;
 import org.slf4j.Logger;
 
 /**
- * My System.out/err to logger
+ * Redirect System.out/err to logger
  *
  * Created by ji.zhang on 8/23/19.
  */
 public class LogbackPrintStream extends PrintStream {
 
-    private final PrintStream stdPrintStream;
-    private final Logger logger;
     private int last;
     private final ByteArrayOutputStream bufOut;
+    private final PrintStream stdPrintStream;
+    private final Logger logger;
 
+    /**
+     * @param logger         Logback logger tool
+     * @param stdPrintStream origin standard out/err
+     */
     public LogbackPrintStream(Logger logger, PrintStream stdPrintStream) {
         super(new ByteArrayOutputStream());
         this.last = -1;
@@ -25,39 +29,36 @@ public class LogbackPrintStream extends PrintStream {
         this.logger = logger;
     }
 
-    public void write(int var1) {
-        if (this.last == 13 && var1 == 10) {
+    @Override
+    public void write(int c) {
+        if (this.last == 13 && c == 10) {
             this.last = -1;
         } else {
-            if (var1 != 10 && var1 != 13) {
-                super.write(var1);
+            if (c != 10 && c != 13) { // 'LF' and 'CR'
+                super.write(c);
             } else {
                 try {
-                    String var2 = this.bufOut.toString();
-                    stdPrintStream.println(var2);
-                    this.logger.debug(var2);
+                    String str = this.bufOut.toString();
+                    stdPrintStream.println(str);
+                    this.logger.debug(str);
                 } finally {
                     this.bufOut.reset();
                 }
             }
-
-            this.last = var1;
+            this.last = c;
         }
     }
 
-    public void write(byte[] var1, int var2, int var3) {
-        if (var3 < 0) {
-            throw new ArrayIndexOutOfBoundsException(var3);
+    @Override
+    public void write(byte[] line, int start, int end) {
+        if (end < 0) {
+            throw new ArrayIndexOutOfBoundsException(end);
         } else {
-            for (int var4 = 0; var4 < var3; ++var4) {
-                this.write(var1[var2 + var4]);
+            for (int pos = 0; pos < end; ++pos) {
+                this.write(line[start + pos]);
             }
 
         }
-    }
-
-    public String toString() {
-        return "RMI";
     }
 
 }
