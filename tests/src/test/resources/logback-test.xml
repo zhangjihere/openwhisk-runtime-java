@@ -22,6 +22,8 @@
     <appender name="logStash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>172.31.60.150:20000</destination>
         <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder" />
+        <reconnectionDelay>60 seconds</reconnectionDelay>
+        <writeBufferSize>32768</writeBufferSize>
     </appender>
     <root level="debug">
         <!--<appender-ref ref="stdout"/>-->
