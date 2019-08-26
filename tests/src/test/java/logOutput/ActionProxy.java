@@ -18,7 +18,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ActionProxy {
 
-//    private static final Logger logger = LoggerFactory.getLogger(ActionProxy.class);
+    //    private static final Logger logger = LoggerFactory.getLogger(ActionProxy.class);
+    private static final String activationId = "activation-id-001";
 
     @Test
     public void start() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -32,8 +33,8 @@ public class ActionProxy {
             socket.setTcpNoDelay(true);
             DataOutputStream os = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 
-            System.setOut(new SocketPrintStream(os, System.out));
-            System.setErr(new SocketPrintStream(os, System.err));
+            System.setOut(new SocketPrintStream(os, System.out, activationId));
+            System.setErr(new SocketPrintStream(os, System.err, activationId));
 
             Method m = ActionCode.class.getMethod("main", String[].class);
             m.invoke(null, (Object) null);

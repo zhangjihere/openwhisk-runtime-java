@@ -17,18 +17,21 @@ public class SocketPrintStream extends PrintStream {
     private int last;
     private final ByteArrayOutputStream bufOut;
     private final PrintStream stdPrintStream;
-    private final DataOutputStream os;
+    private final DataOutputStream dos;
+    private final String activationId;
 
     /**
-     * @param os             Socket's DataOutputStream
+     * @param dos            Socket's DataOutputStream
      * @param stdPrintStream origin standard out/err
+     * @param activationId   the action's activationId
      */
-    public SocketPrintStream(DataOutputStream os, PrintStream stdPrintStream) {
+    public SocketPrintStream(DataOutputStream dos, PrintStream stdPrintStream, String activationId) {
         super(new ByteArrayOutputStream());
         this.last = -1;
         this.bufOut = (ByteArrayOutputStream) super.out;
+        this.dos = dos;
         this.stdPrintStream = stdPrintStream;
-        this.os = os;
+        this.activationId = activationId;
     }
 
     @Override
@@ -41,10 +44,10 @@ public class SocketPrintStream extends PrintStream {
             } else {
                 try {
                     String str = this.bufOut.toString();
-                    String msg = String.format("{\"log\":\"%s\"}", str);
+                    String msg = String.format("{\"log\":\"%s\", activationId:\"%s\"}", str, activationId);
                     stdPrintStream.println(msg);
-                    os.writeBytes(msg);
-                    os.flush();
+                    dos.writeBytes(msg);
+                    dos.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
