@@ -20,6 +20,8 @@ public class SocketPrintStream extends PrintStream {
     private final DataOutputStream dos;
     private final String activationId;
 
+    private static final String LOG_FORMAT = "{\"activationId\":\"%s\",\"log\":\"%s\"}\n";
+
     /**
      * @param dos            Socket's DataOutputStream
      * @param stdPrintStream origin standard out/err
@@ -43,9 +45,9 @@ public class SocketPrintStream extends PrintStream {
                 super.write(c);
             } else {
                 try {
-                    String str = this.bufOut.toString();
-                    String msg = String.format("{\"log\":\"%s\", activationId:\"%s\"}", str, activationId);
-                    stdPrintStream.println(msg);
+                    String logContent = this.bufOut.toString();
+                    String msg = String.format(LOG_FORMAT, activationId, logContent);
+                    stdPrintStream.print(msg);
                     dos.writeBytes(msg);
                     dos.flush();
                 } catch (IOException e) {

@@ -27,7 +27,8 @@ public class ActionProxy {
         System.setProperty("socksProxyPort", "1080");
         System.setProperty("http.nonProxyHosts", "localhost|127.0.0.1");
 
-        try (Socket socket = new Socket("13.209.72.232", 20001)) {
+        try (Socket socket = new Socket("13.209.72.232", 20002)) {
+//        try (Socket socket = new Socket("localhost", 2222)) {
             socket.setSoTimeout(10000);
             socket.setSendBufferSize(1024);
             socket.setTcpNoDelay(true);
