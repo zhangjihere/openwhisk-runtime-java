@@ -5,8 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import org.slf4j.Logger;
-
 /**
  * Redirect System.out/err to Socket
  *
@@ -17,21 +15,21 @@ public class SocketPrintStream extends PrintStream {
     private int last;
     private final ByteArrayOutputStream bufOut;
     private final PrintStream stdPrintStream;
-    private final DataOutputStream dos;
+    private final DataOutputStream logstashOS;
     private final String activationId;
 
-    private static final String LOG_FORMAT = "{\"activationId\":\"%s\",\"log\":\"%s\"}\n";
+    private static final String LOG_FORMAT = "{\"activationId\":\"%s\",\"log\":\"%s\"}";
 
     /**
-     * @param dos            Socket's DataOutputStream
+     * @param logstashOS            Socket's DataOutputStream
      * @param stdPrintStream origin standard out/err
      * @param activationId   the action's activationId
      */
-    public SocketPrintStream(DataOutputStream dos, PrintStream stdPrintStream, String activationId) {
+    public SocketPrintStream(DataOutputStream logstashOS, PrintStream stdPrintStream, String activationId) {
         super(new ByteArrayOutputStream());
         this.last = -1;
         this.bufOut = (ByteArrayOutputStream) super.out;
-        this.dos = dos;
+        this.logstashOS = logstashOS;
         this.stdPrintStream = stdPrintStream;
         this.activationId = activationId;
     }
@@ -48,8 +46,9 @@ public class SocketPrintStream extends PrintStream {
                     String logContent = this.bufOut.toString();
                     String msg = String.format(LOG_FORMAT, activationId, logContent);
                     stdPrintStream.print(msg);
-                    dos.writeBytes(msg);
-                    dos.flush();
+                    logstashOS.writeBytes(System.lineSeparator());
+                    logstashOS.writeBytes(msg);
+                    logstashOS.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
