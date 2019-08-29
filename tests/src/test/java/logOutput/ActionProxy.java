@@ -32,7 +32,7 @@ public class ActionProxy {
 
         Map<String, Object> logMap = Maps.newHashMap();
         List<String> logsList = Lists.newArrayList();
-        try (Socket socket = new Socket("13.209.72.232", 20002);
+        try (Socket socket = new Socket("localhost", 2222);
              DataOutputStream os = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()))) {
             System.setOut(new SocketPrintStream(logsList, System.out));
             System.setErr(new SocketPrintStream(logsList, System.err));
