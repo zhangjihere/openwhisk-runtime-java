@@ -6,10 +6,14 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
+import java.util.List;
+import java.util.Map;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Mock Proxy
@@ -27,20 +31,29 @@ public class ActionProxy {
         System.setProperty("socksProxyPort", "1080");
         System.setProperty("http.nonProxyHosts", "localhost|127.0.0.1");
 
-        try (Socket socket = new Socket("13.209.72.232", 20002)) {
-//        try (Socket socket = new Socket("localhost", 2222)) {
-            socket.setSoTimeout(10000);
-            socket.setSendBufferSize(1024);
-            socket.setTcpNoDelay(true);
-            DataOutputStream os = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+        Map<String, Object> logMap = Maps.newHashMap();
+        List<String> logsList = Lists.newArrayList();
+        try (Socket socket = new Socket("13.209.72.232", 20002);
+             DataOutputStream os = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()))) {
+            System.setOut(new SocketPrintStream(logsList, System.out));
+            System.setErr(new SocketPrintStream(logsList, System.err));
+            try {
+                Method m = ActionCode.class.getMethod("main", String[].class);
+                m.invoke(null, (Object) null);
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
 
-            System.setOut(new SocketPrintStream(os, System.out, activationId));
-            System.setErr(new SocketPrintStream(os, System.err, activationId));
-
-            Method m = ActionCode.class.getMethod("main", String[].class);
-            m.invoke(null, (Object) null);
+            logMap.put("activationId", activationId);
+            logMap.put("logs", logsList);
+            String logs = new Gson().toJson(logMap);
+            os.writeBytes(logs);
+            os.flush();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            logsList.clear();
+            logMap.clear();
         }
     }
 }

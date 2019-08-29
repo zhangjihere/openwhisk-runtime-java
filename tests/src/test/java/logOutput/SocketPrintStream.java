@@ -1,12 +1,11 @@
 package logOutput;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
+import java.util.List;
 
 /**
- * Redirect System.out/err to Socket
+ * Collect System.out/err log and in place send log to logstach based on socket plugin.
  *
  * Created by ji.zhang on 8/23/19.
  */
@@ -15,23 +14,18 @@ public class SocketPrintStream extends PrintStream {
     private int last;
     private final ByteArrayOutputStream bufOut;
     private final PrintStream stdPrintStream;
-    private final DataOutputStream logstashOS;
-    private final String activationId;
-
-    private static final String LOG_FORMAT = "{\"activationId\":\"%s\",\"log\":\"%s\"}";
+    private final List<String> logList;
 
     /**
-     * @param logstashOS            Socket's DataOutputStream
+     * @param logList        the action's log list
      * @param stdPrintStream origin standard out/err
-     * @param activationId   the action's activationId
      */
-    public SocketPrintStream(DataOutputStream logstashOS, PrintStream stdPrintStream, String activationId) {
+    public SocketPrintStream(List<String> logList, PrintStream stdPrintStream) {
         super(new ByteArrayOutputStream());
         this.last = -1;
         this.bufOut = (ByteArrayOutputStream) super.out;
-        this.logstashOS = logstashOS;
+        this.logList = logList;
         this.stdPrintStream = stdPrintStream;
-        this.activationId = activationId;
     }
 
     @Override
@@ -43,14 +37,9 @@ public class SocketPrintStream extends PrintStream {
                 super.write(c);
             } else {
                 try {
-                    String logContent = this.bufOut.toString();
-                    String msg = String.format(LOG_FORMAT, activationId, logContent);
-                    stdPrintStream.print(msg);
-                    logstashOS.writeBytes(System.lineSeparator());
-                    logstashOS.writeBytes(msg);
-                    logstashOS.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    String logMsg = this.bufOut.toString();
+                    stdPrintStream.println(logMsg);
+                    logList.add(logMsg);
                 } finally {
                     this.bufOut.reset();
                 }
