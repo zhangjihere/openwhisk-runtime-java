@@ -22,7 +22,6 @@ import org.junit.Test;
  */
 public class ActionProxy {
 
-    //    private static final Logger logger = LoggerFactory.getLogger(ActionProxy.class);
     private static final String activationId = "activation-id-001";
 
     @Test
